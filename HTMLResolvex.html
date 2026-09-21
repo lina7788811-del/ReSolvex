@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>کسٹمر پورٹل اور ایڈمن ڈیش بورڈ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 30px;
+            direction: rtl;
+        }
+        .wrapper {
+            max-width: 1000px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        @media(max-width: 768px) {
+            .wrapper { grid-template-columns: 1fr; }
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        h2 {
+            margin-top: 0;
+            color: #222;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #444;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            border-color: #007bff;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .table-container {
+            max-height: 320px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #f8fafc;
+            color: #334155;
+            position: sticky;
+            top: 0;
+        }
+        .msg {
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .clear-btn {
+            background-color: #dc3545;
+            margin-top: 18px;
+        }
+        .clear-btn:hover {
+            background-color: #b02a37;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <!-- کسٹمر فارم (فرنٹ اینڈ) - دائیں یا پہلا حصہ -->
+        <div class="card">
+            <h2>📝 کسٹمر فارم (فرنٹ اینڈ)</h2>
+            <form id="custForm">
+                <div class="form-group">
+                    <label>نام:</label>
+                    <input type="text" id="cName" placeholder="اپنا نام لکھیں" required>
+                </div>
+                <div class="form-group">
+                    <label>ای میل:</label>
+                    <input type="email" id="cEmail" placeholder="example@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>فون نمبر:</label>
+                    <input type="text" id="cPhone" placeholder="0300-1234567" required>
+                </div>
+                <button type="submit">معلومات جمع کریں</button>
+            </form>
+            <div id="formMsg" class="msg"></div>
+        </div>
+
+        <!-- ایڈمن پینل (بیک اینڈ ویو) - دوسرا حصہ -->
+        <div class="card">
+            <h2>📊 ایڈمن ڈیش بورڈ (کسٹمرز لسٹ)</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>نام</th>
+                            <th>ای میل</th>
+                            <th>فون نمبر</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody">
+                        <!-- ڈیٹا یہاں شو ہوگا -->
+                    </tbody>
+                </table>
+            </div>
+            <button onclick="clearData()" class="clear-btn">تمام ڈیٹا صاف کریں</button>
+        </div>
+    </div>
+
+    <script>
+        function loadCustomers() {
+            const data = JSON.parse(localStorage.getItem('customersList') || '[]');
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+            if(data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: #666; padding: 20px;">کوئی ڈیٹا موجود نہیں</td></tr>';
+                return;
+            }
+            data.forEach(item => {
+                tbody.innerHTML += `<tr><td>${item.name}</td><td>${item.email}</td><td>${item.phone}</td></tr>`;
+            });
+        }
+
+        document.getElementById('custForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('cName').value;
+            const email = document.getElementById('cEmail').value;
+            const phone = document.getElementById('cPhone').value;
+
+            const data = JSON.parse(localStorage.getItem('customersList') || '[]');
+            data.push({ name, email, phone });
+            localStorage.setItem('customersList', JSON.stringify(data));
+
+            const msgEl = document.getElementById('formMsg');
+            msgEl.style.color = 'green';
+            msgEl.textContent = 'معلومات کامیابی سے محفوظ ہو گئیں!';
+            document.getElementById('custForm').reset();
+            loadCustomers();
+
+            setTimeout(() => { msgEl.textContent = ''; }, 3000);
+        });
+
+        function clearData() {
+            if(confirm('کیا آپ واقعی سارا ڈیٹا ڈیلیٹ کرنا چاہتے ہیں؟')) {
+                localStorage.removeItem('customersList');
+                loadCustomers();
+            }
+        }
+
+        loadCustomers();
+    </script>
+</body>
+</html>
